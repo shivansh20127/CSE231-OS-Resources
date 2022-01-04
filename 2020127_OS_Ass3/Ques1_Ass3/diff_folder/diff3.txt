@@ -1,0 +1,18 @@
+/*this is the difference file which shows the 
+difference between the two sys.c files. */
+//this is the file which has the syscall definition
+
+1641,1653d1640
+< SYSCALL_DEFINE2(fun_system_timer,pid_t,p_id,long long int,cust_timer)
+< {
+< 	struct task_struct *cust_struct;
+< 	for_each_process(cust_struct)
+< 	{
+< 		if((long)task_pid_nr(cust_struct)==p_id)
+< 		{
+< 			cust_struct->se.system_timer=cust_timer;
+< 		}
+< 	}
+< 	return 0;
+< }
+< 

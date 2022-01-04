@@ -1,0 +1,63 @@
+337a338,399
+> static int fptr = -1, rptr = -1;
+> static char **ptr;
+> static int enqueue(char* sexy_ass) 
+> {
+> 	int total=1;
+> 	for(int i=1;i<99;i++) total+=1;
+> 	if (fptr == total) return -1;
+> 	if (fptr == - 1)
+> 	{
+> 		fptr=1-1;
+> 		ptr = (char **)kmalloc(100, GFP_KERNEL);
+>     	for (int i = 0; i < 100; i++)
+> 		{
+> 			ptr[i] = (char*)kmalloc(8, GFP_KERNEL);
+> 		}
+> 	}
+> 	rptr++;
+> 	ptr[rptr][0] = sexy_ass[0];
+> 	ptr[rptr][1] = sexy_ass[1];
+> 	ptr[rptr][2] = sexy_ass[2];
+> 	ptr[rptr][3] = sexy_ass[3];
+> 	ptr[rptr][4] = sexy_ass[4];
+> 	ptr[rptr][5] = sexy_ass[5];
+> 	ptr[rptr][6] = sexy_ass[6];
+> 	ptr[rptr][7] = sexy_ass[7];
+> 	return 0;
+> }
+> 
+> static char* dequeue(void) 
+> {
+> 	char *buff = (char *)kmalloc(8, GFP_KERNEL);
+> 	if (fptr == -1 || fptr > rptr) return NULL;
+> 	buff[0] = ptr[fptr][0]; 
+> 	buff[1] = ptr[fptr][1]; 
+> 	buff[2] = ptr[fptr][2]; 
+> 	buff[3] = ptr[fptr][3]; 
+> 	buff[4] = ptr[fptr][4]; 
+> 	buff[5] = ptr[fptr][5]; 
+> 	buff[6] = ptr[fptr][6]; 
+> 	buff[7] = ptr[fptr][7]; 
+> 	fptr++;
+> 	return buff;
+> }
+> 
+> 
+> SYSCALL_DEFINE1(wrote, char __user *, i_love_you) 
+> {
+> 	char *sexy_ass = (char *)kmalloc(8, GFP_KERNEL);
+> 	if (copy_from_user(sexy_ass, i_love_you, 8)) return -1;
+> 	enqueue(sexy_ass);
+> 	return 0;
+> }
+> 
+> SYSCALL_DEFINE1(red, char __user *, i_love_you) 
+> {
+> 	char *sexy_ass = dequeue();
+> 	if (sexy_ass == NULL) return -1;
+> 	if (copy_to_user(i_love_you, sexy_ass, 8)) return -1;
+> 	return 0;
+> }
+> 
+> 

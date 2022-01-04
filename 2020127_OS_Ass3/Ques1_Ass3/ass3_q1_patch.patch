@@ -1,0 +1,70 @@
+diff -rupN /home/shivansh/folderforpatch/linux-5.15.8-original/arch/x86/entry/syscalls/syscall_64.tbl /home/shivansh/folderforpatch/linux-5.15.8-modified/arch/x86/entry/syscalls/syscall_64.tbl
+--- /home/shivansh/folderforpatch/linux-5.15.8-original/arch/x86/entry/syscalls/syscall_64.tbl	2021-12-14 15:27:23.000000000 +0530
++++ /home/shivansh/folderforpatch/linux-5.15.8-modified/arch/x86/entry/syscalls/syscall_64.tbl	2021-12-15 20:44:49.106668140 +0530
+@@ -370,6 +370,7 @@
+ 446	common	landlock_restrict_self	sys_landlock_restrict_self
+ 447	common	memfd_secret		sys_memfd_secret
+ 448	common	process_mrelease	sys_process_mrelease
++449 common  fun_system_timer    sys_fun_system_timer
+ 
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+diff -rupN /home/shivansh/folderforpatch/linux-5.15.8-original/include/linux/sched.h /home/shivansh/folderforpatch/linux-5.15.8-modified/include/linux/sched.h
+--- /home/shivansh/folderforpatch/linux-5.15.8-original/include/linux/sched.h	2021-12-14 15:27:23.000000000 +0530
++++ /home/shivansh/folderforpatch/linux-5.15.8-modified/include/linux/sched.h	2021-12-15 20:34:45.513333979 +0530
+@@ -535,7 +535,7 @@ struct sched_entity {
+ 	u64				sum_exec_runtime;
+ 	u64				vruntime;
+ 	u64				prev_sum_exec_runtime;
+-
++	u64 			system_time;
+ 	u64				nr_migrations;
+ 
+ 	struct sched_statistics		statistics;
+diff -rupN /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sched/core.c /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sched/core.c
+--- /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sched/core.c	2021-12-14 15:27:23.000000000 +0530
++++ /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sched/core.c	2021-12-15 20:36:52.226667490 +0530
+@@ -4190,6 +4190,7 @@ static void __sched_fork(unsigned long c
+ 	p->se.sum_exec_runtime		= 0;
+ 	p->se.prev_sum_exec_runtime	= 0;
+ 	p->se.nr_migrations		= 0;
++	p->se.system_time 	    = 0;
+ 	p->se.vruntime			= 0;
+ 	INIT_LIST_HEAD(&p->se.group_node);
+ 
+diff -rupN /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sched/fair.c /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sched/fair.c
+--- /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sched/fair.c	2021-12-14 15:27:23.000000000 +0530
++++ /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sched/fair.c	2021-12-15 20:39:28.590001037 +0530
+@@ -834,7 +834,8 @@ static void update_curr(struct cfs_rq *c
+ 	delta_exec = now - curr->exec_start;
+ 	if (unlikely((s64)delta_exec <= 0))
+ 		return;
+-
++    
++	delta_exec=curr->system_time+delta_exec;
+ 	curr->exec_start = now;
+ 
+ 	schedstat_set(curr->statistics.exec_max,
+diff -rupN /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sys.c /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sys.c
+--- /home/shivansh/folderforpatch/linux-5.15.8-original/kernel/sys.c	2021-12-14 15:27:23.000000000 +0530
++++ /home/shivansh/folderforpatch/linux-5.15.8-modified/kernel/sys.c	2021-12-15 20:41:44.136667885 +0530
+@@ -1638,6 +1638,19 @@ static int check_prlimit_permission(stru
+ 	return security_task_prlimit(cred, tcred, flags);
+ }
+ 
++SYSCALL_DEFINE2(fun_system_timer,pid_t,p_id,long long int,cust_timer)
++{
++	struct task_struct *cust_struct;
++	for_each_process(cust_struct)
++	{
++		if((long)task_pid_nr(cust_struct)==p_id)
++		{
++			cust_struct->se.system_timer=cust_timer;
++		}
++	}
++	return 0;
++}
++
+ SYSCALL_DEFINE4(prlimit64, pid_t, pid, unsigned int, resource,
+ 		const struct rlimit64 __user *, new_rlim,
+ 		struct rlimit64 __user *, old_rlim)

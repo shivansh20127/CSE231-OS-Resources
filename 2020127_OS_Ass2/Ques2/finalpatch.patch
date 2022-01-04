@@ -1,0 +1,30 @@
+diff -rupN /home/shivansh/originalkernal/linux-5.14.21/arch/x86/entry/syscalls/syscall_64.tbl /home/shivansh/stockkernal/linux-5.14.21/arch/x86/entry/syscalls/syscall_64.tbl
+--- /home/shivansh/originalkernal/linux-5.14.21/arch/x86/entry/syscalls/syscall_64.tbl	2021-11-21 18:19:09.000000000 +0530
++++ /home/shivansh/stockkernal/linux-5.14.21/arch/x86/entry/syscalls/syscall_64.tbl	2021-11-26 16:59:51.333390471 +0530
+@@ -369,7 +369,7 @@
+ 445	common	landlock_add_rule	sys_landlock_add_rule
+ 446	common	landlock_restrict_self	sys_landlock_restrict_self
+ 447	common	memfd_secret		sys_memfd_secret
+-
++448 common  kernel_2d_memcpy    sys_kernel_2d_memcpy
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+ # in x32 as compared to native x86_64.  These syscalls have numbers 512-547.
+diff -rupN /home/shivansh/originalkernal/linux-5.14.21/kernel/sys.c /home/shivansh/stockkernal/linux-5.14.21/kernel/sys.c
+--- /home/shivansh/originalkernal/linux-5.14.21/kernel/sys.c	2021-11-21 18:19:09.000000000 +0530
++++ /home/shivansh/stockkernal/linux-5.14.21/kernel/sys.c	2021-11-26 17:12:52.146724863 +0530
+@@ -985,6 +985,14 @@ static void do_sys_times(struct tms *tms
+ 	tms->tms_cstime = nsec_to_clock_t(cstime);
+ }
+ 
++SYSCALL_DEFINE4(kernel_2d_memcpy, float **, src, float **, des, int, i, int, j)
++{
++	float helper[i][j];
++	__copy_from_user(helper, src, i*j*sizeof(float));
++	__copy_to_user(des,helper, i*j*sizeof(float));
++	return 1;
++}
++
+ SYSCALL_DEFINE1(times, struct tms __user *, tbuf)
+ {
+ 	if (tbuf) {

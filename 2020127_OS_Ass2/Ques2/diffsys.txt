@@ -1,0 +1,9 @@
+988,995d987
+< SYSCALL_DEFINE4(kernel_2d_memcpy, float **, src, float **, des, int, i, int, j)
+< {
+< 	float helper[i][j];
+< 	__copy_from_user(helper, src, i*j*sizeof(float));
+< 	__copy_to_user(des,helper, i*j*sizeof(float));
+< 	return 1;
+< }
+< 
